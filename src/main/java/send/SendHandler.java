@@ -44,10 +44,22 @@ public class SendHandler {
             }
 
             LOGGER.info("File Upload");
+            long fileSize = fileChannel.size();
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MESSAGE_HEAD_LENGTH);
-            byte[] bytes = Arrays.copyOf(JSON.toJSONBytes(new MessageHead(file.getName(), fileChannel.size(), md5)), MESSAGE_HEAD_LENGTH);
+            byte[] bytes = Arrays.copyOf(JSON.toJSONBytes(new MessageHead(file.getName(), fileSize, md5)), MESSAGE_HEAD_LENGTH);
             socketChannel.write(byteBuffer.put(bytes).flip());
-            fileChannel.transferTo(0, fileChannel.size(), socketChannel);
+
+            long position = 0;
+            long count;
+
+            while (true) {
+                count = fileChannel.transferTo(position, fileSize, socketChannel);
+
+                if (count <= 0) {
+                    break;
+                }
+                position += count;
+            }
 
             byteBuffer.flip().clear();
 
