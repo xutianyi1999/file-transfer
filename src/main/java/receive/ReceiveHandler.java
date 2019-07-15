@@ -25,6 +25,7 @@ public class ReceiveHandler {
                 new AcceptThread(socketChannel).start();
             }
         } catch (IOException e) {
+            LOGGER.error("Error");
             e.printStackTrace();
         }
     }

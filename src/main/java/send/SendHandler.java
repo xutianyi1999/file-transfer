@@ -57,7 +57,7 @@ public class SendHandler {
                 }
             }
 
-            byte[] receiveMessage = new byte[byteBuffer.remaining()];
+            byte[] receiveMessage = new byte[byteBuffer.flip().remaining()];
             byteBuffer.get(receiveMessage);
 
             if (new String(receiveMessage, StandardCharsets.UTF_8).equals(Commons.SUCCESS)) {

@@ -13,7 +13,7 @@ public class ConfigEntity {
     @Parameter(names = {"-p", "--port"})
     private Integer port;
 
-    @Parameter(names = {"-c", "--connect"})
+    @Parameter(names = {"-cn", "--connect"})
     private String connect;
 
     @Parameter(names = {"-f", "--file"})

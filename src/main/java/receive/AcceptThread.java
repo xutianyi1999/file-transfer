@@ -20,7 +20,7 @@ public class AcceptThread extends Thread {
 
     private SocketChannel socketChannel;
 
-    public AcceptThread(SocketChannel socketChannel) {
+    AcceptThread(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
     }
 
@@ -57,12 +57,12 @@ public class AcceptThread extends Thread {
         ) {
             fileChannel.transferFrom(socketChannel, 0, messageHead.getFileSize());
             String md5 = Commons.getMD5(file);
+            String message;
 
-            String message = null;
             if (md5 != null && md5.equals(messageHead.getMD5())) {
-                message = "success";
+                message = Commons.SUCCESS;
             } else {
-                message = "error";
+                message = Commons.FAILED;
             }
 
             messageHeadBuffer.flip().clear().put(message.getBytes(StandardCharsets.UTF_8)).flip();
