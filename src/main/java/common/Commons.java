@@ -9,7 +9,9 @@ import java.io.InputStream;
 public class Commons {
 
     public static int MESSAGE_HEAD_LENGTH = 1024;
-    public static String FILE_PATH = "D:/";
+    public static final String SUCCESS = "1";
+    public static final String FAILED = "0";
+    public static String FILE_PATH = "./";
 
     public static String getMD5(File file) {
         try (InputStream inputStream = new FileInputStream(file)) {

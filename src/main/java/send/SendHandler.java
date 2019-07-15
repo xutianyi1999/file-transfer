@@ -3,6 +3,8 @@ package send;
 import com.alibaba.fastjson.JSON;
 import common.Commons;
 import entity.MessageHead;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,28 +20,30 @@ import static common.Commons.MESSAGE_HEAD_LENGTH;
 
 public class SendHandler {
 
-    public void send(String path) {
-        File file = new File(path);
+    private static final Logger LOGGER = LogManager.getLogger(SendHandler.class);
 
-        if (!file.exists() || !file.isFile()) {
-            return;
-        }
-
+    public void send(String host, int port, File file) {
+        LOGGER.info("Get File MD5");
         String md5 = Commons.getMD5(file);
 
         if (md5 == null) {
+            LOGGER.error("Get File Md5 Failed");
             return;
         }
 
         try (
                 SocketChannel socketChannel = SocketChannel.open();
                 RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-                FileChannel fileChannel = randomAccessFile.getChannel();
+                FileChannel fileChannel = randomAccessFile.getChannel()
         ) {
-            if (!socketChannel.connect(new InetSocketAddress("127.0.0.1", 1999))) {
+            LOGGER.info("Connect To Server");
+
+            if (!socketChannel.connect(new InetSocketAddress(host, port))) {
+                LOGGER.error("Connection Fail");
                 return;
             }
 
+            LOGGER.info("File Upload");
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MESSAGE_HEAD_LENGTH);
             byte[] bytes = Arrays.copyOf(JSON.toJSONBytes(new MessageHead(file.getName(), fileChannel.size(), md5)), MESSAGE_HEAD_LENGTH);
             socketChannel.write(byteBuffer.put(bytes).flip());
@@ -55,13 +59,15 @@ public class SendHandler {
 
             byte[] receiveMessage = new byte[byteBuffer.remaining()];
             byteBuffer.get(receiveMessage);
-            System.out.println(new String(receiveMessage, StandardCharsets.UTF_8));
+
+            if (new String(receiveMessage, StandardCharsets.UTF_8).equals(Commons.SUCCESS)) {
+                LOGGER.info("Complete");
+            } else {
+                LOGGER.error("Failed");
+            }
         } catch (IOException e) {
+            LOGGER.error("Error");
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        new SendHandler().send("C:\\Users\\xutia\\Pictures\\v2-18701cc218618f5e315550190ee61dff_hd.jpg");
     }
 }
