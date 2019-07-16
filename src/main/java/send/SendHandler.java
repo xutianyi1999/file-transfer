@@ -50,15 +50,9 @@ public class SendHandler {
             socketChannel.write(byteBuffer.put(bytes).flip());
 
             long position = 0;
-            long count;
 
-            while (true) {
-                count = fileChannel.transferTo(position, fileSize, socketChannel);
-
-                if (count <= 0) {
-                    break;
-                }
-                position += count;
+            while (position < fileSize) {
+                position += fileChannel.transferTo(position, fileSize, socketChannel);
             }
 
             byteBuffer.flip().clear();
