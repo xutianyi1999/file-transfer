@@ -4,20 +4,31 @@ import com.beust.jcommander.Parameter;
 
 public class ConfigEntity {
 
-    @Parameter(names = {"-s", "--server"})
+    @Parameter(names = {"-s", "--server"}, description = "Start As Server")
     private boolean server = false;
 
-    @Parameter(names = {"-c", "--client"})
+    @Parameter(names = {"-c", "--client"}, description = "Start As Client")
     private boolean client = false;
 
-    @Parameter(names = {"-p", "--port"})
+    @Parameter(names = {"-p", "--port"}, description = "Binding Port")
     private Integer port;
 
-    @Parameter(names = {"-cn", "--connect"})
+    @Parameter(names = {"-cn", "--connect"}, description = "Target Server")
     private String connect;
 
-    @Parameter(names = {"-f", "--file"})
+    @Parameter(names = {"-f", "--file"}, description = "File Path")
     private String filePath;
+
+    @Parameter(names = {"-h", "--help"}, help = true)
+    private boolean help;
+
+    public boolean isHelp() {
+        return help;
+    }
+
+    public void setHelp(boolean help) {
+        this.help = help;
+    }
 
     public boolean isServer() {
         return server;
