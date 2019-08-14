@@ -45,7 +45,7 @@ public class SendHandler {
 
             LOGGER.info("File Upload");
             long fileSize = fileChannel.size();
-            ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MESSAGE_HEAD_LENGTH);
+            ByteBuffer byteBuffer = ByteBuffer.allocate(MESSAGE_HEAD_LENGTH);
             byte[] bytes = Arrays.copyOf(JSON.toJSONBytes(new MessageHead(file.getName(), fileSize, md5)), MESSAGE_HEAD_LENGTH);
             socketChannel.write(byteBuffer.put(bytes).flip());
 
