@@ -27,7 +27,7 @@ public class SendHandler {
         String md5 = Commons.getMD5(file);
 
         if (md5 == null) {
-            LOGGER.error("Get File Md5 Failed");
+            LOGGER.error("Get File MD5 Failed");
             return;
         }
 
