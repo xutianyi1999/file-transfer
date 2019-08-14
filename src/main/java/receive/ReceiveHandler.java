@@ -21,7 +21,6 @@ public class ReceiveHandler {
 
             while (true) {
                 SocketChannel socketChannel = serverSocketChannel.accept();
-                LOGGER.info("Remote Address: " + socketChannel.getRemoteAddress());
                 new AcceptThread(socketChannel).start();
             }
         } catch (IOException e) {

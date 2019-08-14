@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
@@ -29,6 +30,22 @@ public class AcceptThread extends Thread {
 
     @Override
     public void run() {
+        SocketAddress remoteAddress;
+
+        try {
+            remoteAddress = socketChannel.getRemoteAddress();
+        } catch (IOException e) {
+            LOGGER.error("Get Remote Address Failed");
+            e.printStackTrace();
+
+            try {
+                socketChannel.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            return;
+        }
+
         ByteBuffer messageHeadBuffer = ByteBuffer.allocate(MESSAGE_HEAD_LENGTH);
 
         try {
@@ -38,7 +55,7 @@ public class AcceptThread extends Thread {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Analysis Message Head Failed");
+            LOGGER.error(remoteAddress + ": Analysis Message Head Failed");
             e.printStackTrace();
 
             try {
@@ -53,7 +70,7 @@ public class AcceptThread extends Thread {
         messageHeadBuffer.flip().get(bytes);
         MessageHead messageHead = JSON.parseObject(bytes, MessageHead.class);
 
-        LOGGER.info("Downloading: " + messageHead.getFileName());
+        LOGGER.info(remoteAddress + ": Downloading: " + messageHead.getFileName());
         File file = new File(FILE_PATH, messageHead.getFileName());
 
         try (
@@ -62,28 +79,27 @@ public class AcceptThread extends Thread {
         ) {
             fileChannel.transferFrom(socketChannel, 0, messageHead.getFileSize());
 
-            LOGGER.info("Check File MD5");
+            LOGGER.info(remoteAddress + ": Check File MD5");
             String md5 = Commons.getMD5(file);
             String message;
 
             if (md5 != null && md5.equals(messageHead.getMD5())) {
-                LOGGER.info("Success");
+                LOGGER.info(remoteAddress + ": Success");
                 message = Commons.SUCCESS;
             } else {
-                LOGGER.error("Failed");
+                LOGGER.error(remoteAddress + ": Failed");
                 message = Commons.FAILED;
             }
 
             messageHeadBuffer.flip().clear().put(message.getBytes(StandardCharsets.UTF_8)).flip();
             socketChannel.write(messageHeadBuffer);
         } catch (Exception e) {
-            LOGGER.error("Error");
+            LOGGER.error(remoteAddress + ": Error");
             e.printStackTrace();
         } finally {
             try {
                 socketChannel.close();
             } catch (IOException e) {
-                LOGGER.error("Error");
                 e.printStackTrace();
             }
         }
